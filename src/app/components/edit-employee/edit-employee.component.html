@@ -1,0 +1,52 @@
+<div class="add-employee-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl shadow-xl max-w-md w-full">
+    <div class="modal_header flex justify-between items-center mb-4 border-b border-gray-300 p-5">
+      <h2 class="text-xl font-semibold">Edit Employee</h2>
+      <button (click)="closeEditEmployeeModal()" class="text-gray-500 text-3xl hover:text-gray-700">
+        &times;
+      </button>
+    </div>
+    <form class="modal_body p-5" [formGroup]="editEmployeeForm" (ngSubmit)="submitForm()" >
+      <div class="mb-4">
+        <label for="name" class="block font-semibold mb-1">Name</label>
+        <input type="text" id="name" formControlName="empName" class="w-full p-2 outline-none border border-gray-300 rounded-md" />
+        @if (editEmployeeForm.get('empName')?.errors && editEmployeeForm.get('empName')?.touched) {
+          <p class="text-sm text-red-500 mt-1">* Name is required</p>
+        }
+      </div>
+      <div class="mb-4">
+        <label for="email" class="block font-semibold mb-1">Email</label>
+        <input type="email" id="email" formControlName="empEmail" class="w-full p-2 outline-none border border-gray-300 rounded-md" />
+        @if (editEmployeeForm.get('empEmail')?.errors && editEmployeeForm.get('empEmail')?.touched) {
+          @if (editEmployeeForm.get('empEmail')?.getError('required')) {
+            <p class="text-sm text-red-500 mt-1">* Email is required</p>
+          } @else if (editEmployeeForm.get('empEmail')?.getError('email')) {
+            <p class="text-sm text-red-500 mt-1">* Enter valid Email</p>
+          }
+        }
+      </div>
+      <div class="mb-4">
+        <label for="address" class="block font-semibold mb-1">Address</label>
+        <textarea id="address" formControlName="empAddress" class="w-full p-2 outline-none border border-gray-300 rounded-md"></textarea>
+        @if (editEmployeeForm.get('empAddress')?.errors && editEmployeeForm.get('empAddress')?.touched) {
+          <p class="text-sm text-red-500 mt-1">* Address is required</p>
+        }
+      </div>
+      <div class="mb-4">
+        <label for="phone" class="block font-semibold mb-1">Phone</label>
+        <input type="tel" id="phone" formControlName="empPhone" class="w-full p-2 outline-none border border-gray-300 rounded-md" />
+        @if (editEmployeeForm.get('empPhone')?.errors && editEmployeeForm.get('empPhone')?.touched) {
+          @if (editEmployeeForm.get('empPhone')?.getError('required')) {
+            <p class="text-sm text-red-500 mt-1">* Phone is required</p>
+          } @else if (editEmployeeForm.get('empPhone')?.getError('pattern')) {
+            <p class="text-sm text-red-500 mt-1">* Phone should be 11 number only and should begin with 011, 012 or 010</p>
+          }
+        }
+      </div>
+      <div class="modal_footer p-5 flex gap-4 justify-end bg-gray-200">
+        <button type="button" (click)="closeEditEmployeeModal()">Cancel</button>
+        <button type="submit" class="py-2 px-4 bg-[#218838] text-white rounded-md">Save</button>
+      </div>
+    </form>
+  </div>
+</div>

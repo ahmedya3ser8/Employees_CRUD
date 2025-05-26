@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f6f6f6;
+}
+
+@layer components {
+  .container {
+    @apply max-w-screen-xl px-5 md:px-0
+  }
+}
+
+.ngx-pagination .pagination-previous a:before, .ngx-pagination .pagination-previous.disabled:before,
+.ngx-pagination .pagination-next a:after, .ngx-pagination .pagination-next.disabled:after {
+  display: none !important;
+}
