@@ -1,6 +1,7 @@
-import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmployeesService } from '../../services/employees.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-add-employee',
@@ -8,10 +9,11 @@ import { EmployeesService } from '../../services/employees.service';
   templateUrl: './add-employee.component.html',
   styleUrl: './add-employee.component.css'
 })
-export class AddEmployeeComponent implements OnInit {
+export class AddEmployeeComponent implements OnInit, OnDestroy {
   @Output() closeModal = new EventEmitter();
   @Output() addSuccess = new EventEmitter();
   addEmployeeForm!: FormGroup;
+  destroy$: Subject<any> = new Subject();
   private readonly formBuilder = inject(FormBuilder);
   private readonly employeesService = inject(EmployeesService);
   ngOnInit(): void {
@@ -24,7 +26,7 @@ export class AddEmployeeComponent implements OnInit {
   }
   submitForm() {
     if (this.addEmployeeForm.valid) {
-      this.employeesService.addEmployee(this.addEmployeeForm.value).subscribe({
+      this.employeesService.addEmployee(this.addEmployeeForm.value).pipe(takeUntil(this.destroy$)).subscribe({
         next: (res) => {
           if (res === 1) {
             this.addEmployeeForm.reset();
@@ -42,5 +44,8 @@ export class AddEmployeeComponent implements OnInit {
   }
   closeAddEmployeeModal() {
     this.closeModal.emit();
+  }
+  ngOnDestroy(): void {
+    this.destroy$.next('destroy')
   }
 }

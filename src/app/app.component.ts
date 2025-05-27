@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { AddEmployeeComponent } from "./components/add-employee/add-employee.component";
 import { EditEmployeeComponent } from "./components/edit-employee/edit-employee.component";
 import { EmployeesService } from './services/employees.service';
@@ -6,6 +6,7 @@ import { IEmployee } from './interfaces/iemployee';
 import { NgxPaginationModule } from 'ngx-pagination';
 import Swal from 'sweetalert2';
 import { NgxSpinnerComponent, NgxSpinnerService } from 'ngx-spinner';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ import { NgxSpinnerComponent, NgxSpinnerService } from 'ngx-spinner';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'employees';
   currentPage: number = 1;
   page: number = 1;
@@ -27,6 +28,7 @@ export class AppComponent implements OnInit {
   isAllSelected: boolean = false;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  destroy$: Subject<any> = new Subject();
   private readonly employeesService = inject(EmployeesService)
   private readonly spinner = inject(NgxSpinnerService)
   ngOnInit(): void {
@@ -35,7 +37,7 @@ export class AppComponent implements OnInit {
 
   getAllEmployees() {
     this.spinner.show();
-    this.employeesService.getAllEmployees().subscribe({
+    this.employeesService.getAllEmployees().pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         this.employeesList = res;
         this.total = res.length;
@@ -43,6 +45,7 @@ export class AppComponent implements OnInit {
       },
       error: (err) => {
         console.log(err);
+        this.spinner.hide();
       }
     })
   }
@@ -70,6 +73,7 @@ export class AppComponent implements OnInit {
 
   changePage(event: any) {
     this.page = event;
+    this.getAllEmployees();
   }
 
   getCurrentPageItems(): number {
@@ -148,12 +152,12 @@ export class AppComponent implements OnInit {
       this.sortDirection = 'asc';
     }
     this.employeesList.sort((a: any, b: any) => {
-      const aValue = a[column].toLowerCase();
-      const bValue = b[column].toLowerCase();
+      const ascending = a[column].toLowerCase();
+      const descending = b[column].toLowerCase();
       if (this.sortDirection === 'asc') {
-        return aValue.localeCompare(bValue);
+        return ascending.localeCompare(descending);
       } else {
-        return bValue.localeCompare(aValue);
+        return descending.localeCompare(ascending);
       }
     });
   }
@@ -163,5 +167,9 @@ export class AppComponent implements OnInit {
       return 'fa-sort';
     }
     return this.sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next('destroy')
   }
 }

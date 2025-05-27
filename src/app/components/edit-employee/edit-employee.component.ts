@@ -1,6 +1,7 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmployeesService } from '../../services/employees.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-edit-employee',
@@ -8,11 +9,12 @@ import { EmployeesService } from '../../services/employees.service';
   templateUrl: './edit-employee.component.html',
   styleUrl: './edit-employee.component.css'
 })
-export class EditEmployeeComponent implements OnInit {
+export class EditEmployeeComponent implements OnInit, OnDestroy {
   @Output() closeEditModal = new EventEmitter();
   @Output() editSuccess = new EventEmitter();
   @Input() empId!: number;
   editEmployeeForm!: FormGroup;
+  destroy$: Subject<any> = new Subject();
   private readonly formBuilder = inject(FormBuilder);
   private readonly employeesService = inject(EmployeesService);
   ngOnInit(): void {
@@ -27,7 +29,7 @@ export class EditEmployeeComponent implements OnInit {
   }
   submitForm() {
     if (this.editEmployeeForm.valid) {
-      this.employeesService.editEmployee(this.editEmployeeForm.value).subscribe({
+      this.employeesService.editEmployee(this.editEmployeeForm.value).pipe(takeUntil(this.destroy$)).subscribe({
         next: (res) => {
           if (res === 1) {
             this.editEmployeeForm.reset();
@@ -44,7 +46,7 @@ export class EditEmployeeComponent implements OnInit {
     }
   }
   getEmployee() {
-    this.employeesService.getEmployee(this.empId).subscribe({
+    this.employeesService.getEmployee(this.empId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         this.fillForm(res);
       },
@@ -64,5 +66,8 @@ export class EditEmployeeComponent implements OnInit {
   }
   closeEditEmployeeModal() {
     this.closeEditModal.emit();
+  }
+  ngOnDestroy(): void {
+    this.destroy$.next('destroy')
   }
 }
