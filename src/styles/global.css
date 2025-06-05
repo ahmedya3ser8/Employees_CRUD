@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f6f6f6;
+}
+
+@layer components {
+  .container {
+    @apply max-w-screen-xl px-5 md:px-0
+  }
+}
